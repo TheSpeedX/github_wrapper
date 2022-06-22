@@ -10,6 +10,8 @@ BASE_URL = "https://api.github.com"
 
 
 def remove_filter(obj):
+    """Removes keys from nested dictionaries
+    where the string api.github.com is found"""
     if isinstance(obj, (tuple, list, set)):
         t = type(obj)
         obj = t(remove_filter(a) for a in obj)
@@ -25,6 +27,7 @@ async def call_github_api(
     url_path: str,
     json: Dict = None
 ) -> Dict:
+    """Hits the github API with given path and parameters"""
     headers = {
         "Accept": "application/vnd.github.v3+json",
         "Authorization": f"token {token}"

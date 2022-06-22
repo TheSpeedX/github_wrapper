@@ -10,6 +10,7 @@ auth = APIRouter()
 
 @auth.get('/login', tags=["github"])
 async def start_github_login(request: Request):
+    """Initiates Github OAuth"""
     client = WebApplicationClient(GITHUB_OAUTH['CLIENT_ID'])
     uri = client.prepare_request_uri(
         GITHUB_OAUTH['AUTHORIZE_URI'],
@@ -21,6 +22,7 @@ async def start_github_login(request: Request):
 
 @auth.get('/callback', tags=["github"])
 async def callback(code: str):
+    """Callback for Github OAuth"""
     async with httpx.AsyncClient() as client:
         response = await client.post(
             GITHUB_OAUTH['TOKEN_URI'],
