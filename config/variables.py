@@ -10,7 +10,7 @@ JWT_CONFIG = {
 }
 
 GITHUB_OAUTH = {
-    "CLIENT_ID": "7d0f1789313000dbd54d",
+    "CLIENT_ID": os.environ.get("CLIENT_ID"),
     "CLIENT_SECRET": os.environ.get("CLIENT_SECRET"),
     "AUTHORIZE_URI": 'https://github.com/login/oauth/authorize',
     "TOKEN_URI": 'https://github.com/login/oauth/access_token',
