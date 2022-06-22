@@ -92,3 +92,35 @@ async def update_topics(
         url_path=f'repos/{username}/{repo_name}/topics',
         json={"names": topics}
     )
+
+
+@repo.get('/contributors', tags=["Insights"])
+async def list_contributors(
+        repo_name: str,
+        username: Optional[str] = None,
+        current_username: str = Depends(get_current_username),
+        access_token: str = Depends(get_current_token)
+):
+    if not username:
+        username = current_username
+    return await call_github_api(
+        token=access_token,
+        request_type="GET",
+        url_path=f'repos/{username}/{repo_name}/contributors'
+    )
+
+
+@repo.get('/stargazers', tags=["Insights"])
+async def list_stargazers(
+        repo_name: str,
+        username: Optional[str] = None,
+        current_username: str = Depends(get_current_username),
+        access_token: str = Depends(get_current_token)
+):
+    if not username:
+        username = current_username
+    return await call_github_api(
+        token=access_token,
+        request_type="GET",
+        url_path=f'repos/{username}/{repo_name}/stargazers'
+    )
