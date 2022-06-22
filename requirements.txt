@@ -5,3 +5,4 @@ pyjwt
 python-multipart
 httpx
 oauthlib
+python-dotenv
