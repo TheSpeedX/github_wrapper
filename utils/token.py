@@ -20,10 +20,15 @@ credentials_exception = HTTPException(
 
 def generate_access_token(
         access_token: str,
+        username: str,
         expires_in: int = JWT_CONFIG["ACCESS_TOKEN_EXPIRE_MINUTES"]):
     now = datetime.now(timezone.utc)
     expire = now + timedelta(minutes=expires_in)
-    to_encode = {"access_token": access_token, "exp": expire, "iat": now}
+    to_encode = {
+        "access_token": access_token,
+        "exp": expire, "iat": now,
+        "username": username
+    }
     return jwt.encode(
         to_encode,
         JWT_CONFIG["SECRET_KEY"],
@@ -31,21 +36,29 @@ def generate_access_token(
 
 
 async def decode_access_token(token: str):
-    payload = jwt.decode(
+    return jwt.decode(
         token,
         JWT_CONFIG["SECRET_KEY"],
         algorithms=JWT_CONFIG["ALGORITHM"])
-    access_token: str = payload.get("access_token")
-    if access_token is None:
-        raise credentials_exception
-    return access_token
 
 
 async def get_current_token(token: str = Depends(oauth2_scheme)):
     try:
-        access_token = await decode_access_token(token)
+        token_info = await decode_access_token(token)
+        access_token = token_info.get('access_token')
     except jwt.exceptions.ExpiredSignatureError as e:
         raise HTTPException(status_code=403, detail="Token Expired") from e
     except Exception as e:
         raise credentials_exception from e
     return access_token
+
+
+async def get_current_username(token: str = Depends(oauth2_scheme)):
+    try:
+        token_info = await decode_access_token(token)
+        username = token_info.get('username')
+    except jwt.exceptions.ExpiredSignatureError as e:
+        raise HTTPException(status_code=403, detail="Token Expired") from e
+    except Exception as e:
+        raise credentials_exception from e
+    return username

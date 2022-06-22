@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
-from utils.token import get_current_token
-from models.repo import CreateRepoModel
-from typing import Dict
+from utils.token import get_current_token, get_current_username
+from models.repo import CreateRepoModel, UpdateTopicsModel
+from typing import Dict, Optional
 import httpx
 
 repo = APIRouter()
@@ -31,7 +31,7 @@ async def call_github_api(
     # TODO: Remove fields that have api.github.com
 
 
-@repo.post('/create', tags=["Repo Actions"])
+@repo.post('/repo', tags=["Repo"])
 async def create_repo(
         repo_data: CreateRepoModel,
         access_token: str = Depends(get_current_token)
@@ -42,3 +42,19 @@ async def create_repo(
         url_path='user/repos',
         json=dict(repo_data),
     )
+
+
+@repo.get('/repo', tags=["Repo"])
+async def list_repos(
+        username: Optional[str] = None,
+        current_username: str = Depends(get_current_username),
+        access_token: str = Depends(get_current_token)
+):
+    if not username:
+        username = current_username
+    return await call_github_api(
+        token=access_token,
+        request_type="GET",
+        url_path=f'users/{username}/repos'
+    )
+

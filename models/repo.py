@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import Optional, List
 
 
 class CreateRepoModel(BaseModel):
@@ -13,5 +13,19 @@ class CreateRepoModel(BaseModel):
                 "name": "ABC",
                 "description": "Test Repo",
                 "private": True
+            }
+        }
+
+
+class UpdateTopicsModel(BaseModel):
+    repo_name: str
+    username: Optional[str] = None
+    topics: List[str]
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "repo_name": "ABC",
+                "topics": ["python", "fastapi"]
             }
         }

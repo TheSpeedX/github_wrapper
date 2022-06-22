@@ -1,9 +1,7 @@
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import RedirectResponse
-from datetime import datetime
-from config.variables import GITHUB_OAUTH, JWT_CONFIG
+from config.variables import GITHUB_OAUTH
 from utils.token import generate_access_token
-import uuid
 from oauthlib.oauth2 import WebApplicationClient
 import httpx
 
@@ -34,23 +32,23 @@ async def callback(code: str):
             },
             headers={"Accept": "application/json"}
         )
-    print(response.text)
-    try:
-        response = response.json()
-        print(response)
-        access_token = response.get('access_token')
-        return {"access_token": generate_access_token(access_token)}
-    except Exception as e:
-        raise HTTPException(
-            status_code=401, detail="Error Occured Retry OAuth") from e
-
-
-@auth.get('/guest/token', tags=["auth"])
-async def get_guest_token():
-    username = str(uuid.uuid4())
-    return {
-        "access_token": generate_guest_access_token(username),
-        "token_type": "Bearer",
-        "access_token_expire":
-        JWT_CONFIG["GUEST_TOKEN_EXPIRE_MINUTES"]*60,
-    }
+        try:
+            response = response.json()
+            print(response)
+            access_token = response.get('access_token')
+            user_info = await client.get(
+                "https://api.github.com/user",
+                headers={
+                    "Accept": "application/vnd.github.v3+json",
+                    "Authorization": f"token {access_token}"
+                }
+            )
+            user_info = user_info.json()
+            print(user_info)
+            username = user_info['login']
+            return {
+                "access_token": generate_access_token(access_token, username)
+            }
+        except Exception as e:
+            raise HTTPException(
+                status_code=401, detail="Error Occured Retry OAuth") from e
