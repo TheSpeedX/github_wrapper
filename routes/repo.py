@@ -9,6 +9,16 @@ repo = APIRouter()
 BASE_URL = "https://api.github.com"
 
 
+def remove_filter(obj):
+    if isinstance(obj, (tuple, list, set)):
+        t = type(obj)
+        obj = t(remove_filter(a) for a in obj)
+    elif isinstance(obj, dict):
+        obj = {k: remove_filter(v) for k, v in obj.items()
+               if isinstance(v, str) and "api.github.com" not in v}
+    return obj
+
+
 async def call_github_api(
     token: str,
     request_type: str,
@@ -27,8 +37,7 @@ async def call_github_api(
             request = client.build_request(
                 request_type, f"{BASE_URL}/{url_path}")
         response = client.send(request)
-        return response.json()
-    # TODO: Remove fields that have api.github.com
+        return remove_filter(response.json())
 
 
 @repo.post('/repo', tags=["Repo"])
@@ -124,3 +133,4 @@ async def list_stargazers(
         request_type="GET",
         url_path=f'repos/{username}/{repo_name}/stargazers'
     )
+
