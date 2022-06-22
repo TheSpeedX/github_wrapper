@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 from routes.github import auth
+from routes.user import user
 from routes.repo import repo
 
 app = FastAPI(title="COMETLabs Github Wrapper")
@@ -24,3 +25,4 @@ async def home():
 
 app.include_router(auth, prefix="/github")
 app.include_router(repo, prefix="/repos")
+app.include_router(user, prefix="/user")
