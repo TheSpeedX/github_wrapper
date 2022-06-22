@@ -134,3 +134,18 @@ async def list_stargazers(
         url_path=f'repos/{username}/{repo_name}/stargazers'
     )
 
+
+@repo.get('/repo_with_stars_and_forks', tags=["Insights"])
+async def repo_with_stars_and_forks(
+        username: Optional[str] = None,
+        current_username: str = Depends(get_current_username),
+        access_token: str = Depends(get_current_token)
+):
+    if not username:
+        username = current_username
+    response = await call_github_api(
+        token=access_token,
+        request_type="GET",
+        url_path=f'search/repositories?q=user:{username} stars:>5 forks:>5'
+    )
+    return response['items']
