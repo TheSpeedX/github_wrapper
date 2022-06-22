@@ -58,3 +58,37 @@ async def list_repos(
         url_path=f'users/{username}/repos'
     )
 
+
+@repo.get('/topics', tags=["Topics"])
+async def list_topics(
+        repo_name: str,
+        username: Optional[str] = None,
+        current_username: str = Depends(get_current_username),
+        access_token: str = Depends(get_current_token)
+):
+    if not username:
+        username = current_username
+    return await call_github_api(
+        token=access_token,
+        request_type="GET",
+        url_path=f'repos/{username}/{repo_name}/topics'
+    )
+
+
+@repo.put('/topics', tags=["Topics"])
+async def update_topics(
+        topic_info: UpdateTopicsModel,
+        current_username: str = Depends(get_current_username),
+        access_token: str = Depends(get_current_token)
+):
+    username = topic_info.username
+    repo_name = topic_info.repo_name
+    topics = topic_info.topics
+    if not username:
+        username = current_username
+    return await call_github_api(
+        token=access_token,
+        request_type="PUT",
+        url_path=f'repos/{username}/{repo_name}/topics',
+        json={"names": topics}
+    )
